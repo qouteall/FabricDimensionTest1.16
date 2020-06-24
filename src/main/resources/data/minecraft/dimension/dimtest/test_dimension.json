@@ -1,0 +1,8 @@
+{
+  "generator": {
+    "type": "dimtest:example_generator"
+  },
+  "type": "dimtest:dim_type"
+}
+
+

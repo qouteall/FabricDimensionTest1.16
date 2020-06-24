@@ -6,7 +6,9 @@
   "mixins": [
   ],
   "client": [
-    "ExampleMixin"
+    "MixinChunkGenerator",
+    "MixinMinecraftServer",
+    "MixinSurfaceChunkGenerator"
   ],
   "injectors": {
     "defaultRequire": 1

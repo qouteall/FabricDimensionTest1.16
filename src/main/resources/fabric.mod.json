@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "dimtest",
   "version": "${version}",
 
-  "name": "Example Mod",
+  "name": "Dimension Test",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
     "Me!"
@@ -28,10 +28,10 @@
 
   "depends": {
     "fabricloader": ">=0.7.4",
-    "fabric": "*",
-    "minecraft": "1.15.x"
+    "fabric": "*"
   },
   "suggests": {
     "flamingo": "*"
-  }
+  },
+  "accessWidener" : "dimtest.accesswidener"
 }

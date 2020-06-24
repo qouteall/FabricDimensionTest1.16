@@ -1,0 +1,4 @@
+accessWidener v1 named
+Accessible method net/minecraft/world/gen/chunk/ChunkGeneratorType$Preset createIslandsType (Lnet/minecraft/world/gen/chunk/StructuresConfig;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/gen/chunk/ChunkGeneratorType$Preset;ZZ)Lnet/minecraft/world/gen/chunk/ChunkGeneratorType;
+Mutable field net/minecraft/world/dimension/DimensionOptions chunkGenerator Lnet/minecraft/world/gen/chunk/ChunkGenerator;
+Accessible field net/minecraft/world/dimension/DimensionOptions chunkGenerator Lnet/minecraft/world/gen/chunk/ChunkGenerator;
