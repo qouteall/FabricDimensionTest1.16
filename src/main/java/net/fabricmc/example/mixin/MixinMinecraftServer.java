@@ -13,32 +13,32 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(MinecraftServer.class)
 public class MixinMinecraftServer {
-    // Replace the ChunkGenerator with the Current Seed and Skip Vanilla Dimensions
-    @Redirect(
-        method = "createWorlds",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/gen/GeneratorOptions;getDimensionMap()Lnet/minecraft/util/registry/SimpleRegistry;"
-        )
-    )
-    private SimpleRegistry<DimensionOptions> onGetDimensionMap(GeneratorOptions generatorOptions) {
-        SimpleRegistry<DimensionOptions> dimensionMap = generatorOptions.getDimensionMap();
-        
-        dimensionMap.getIds().forEach(dimensionId -> {
-            if (!isVanillaDimension(dimensionId)) {
-                DimensionOptions dimensionOptions = dimensionMap.get(dimensionId);
-                dimensionOptions.chunkGenerator =
-                    dimensionOptions.chunkGenerator.withSeed(generatorOptions.getSeed());
-            }
-        });
-        
-        return dimensionMap;
-    }
-    
-    @Unique
-    private static boolean isVanillaDimension(Identifier identifier) {
-        return identifier.equals(World.OVERWORLD.getValue()) ||
-            identifier.equals(World.NETHER.getValue()) ||
-            identifier.equals(World.END.getValue());
-    }
+//    // Replace the ChunkGenerator with the Current Seed and Skip Vanilla Dimensions
+//    @Redirect(
+//        method = "createWorlds",
+//        at = @At(
+//            value = "INVOKE",
+//            target = "Lnet/minecraft/world/gen/GeneratorOptions;getDimensionMap()Lnet/minecraft/util/registry/SimpleRegistry;"
+//        )
+//    )
+//    private SimpleRegistry<DimensionOptions> onGetDimensionMap(GeneratorOptions generatorOptions) {
+//        SimpleRegistry<DimensionOptions> dimensionMap = generatorOptions.getDimensionMap();
+//
+//        dimensionMap.getIds().forEach(dimensionId -> {
+//            if (!isVanillaDimension(dimensionId)) {
+//                DimensionOptions dimensionOptions = dimensionMap.get(dimensionId);
+//                dimensionOptions.chunkGenerator =
+//                    dimensionOptions.chunkGenerator.withSeed(generatorOptions.getSeed());
+//            }
+//        });
+//
+//        return dimensionMap;
+//    }
+//
+//    @Unique
+//    private static boolean isVanillaDimension(Identifier identifier) {
+//        return identifier.equals(World.OVERWORLD.getValue()) ||
+//            identifier.equals(World.NETHER.getValue()) ||
+//            identifier.equals(World.END.getValue());
+//    }
 }

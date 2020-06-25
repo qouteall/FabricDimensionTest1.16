@@ -16,7 +16,7 @@ public abstract class MixinSurfaceChunkGenerator extends ChunkGenerator {
     @Shadow
     @Final
     protected ChunkGeneratorType field_24774;
-    
+
     public MixinSurfaceChunkGenerator(
         BiomeSource biomeSource,
         BiomeSource biomeSource2,
@@ -25,9 +25,10 @@ public abstract class MixinSurfaceChunkGenerator extends ChunkGenerator {
     ) {
         super(biomeSource, biomeSource2, structuresConfig, l);
     }
-    
+
     // Make this method to exist in dedicated server
     public ChunkGenerator withSeed(long seed) {
         return new SurfaceChunkGenerator(this.biomeSource.withSeed(seed), seed, this.field_24774);
     }
+    
 }

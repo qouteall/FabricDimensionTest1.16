@@ -6,6 +6,7 @@ import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Blocks;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.Heightmap;
@@ -17,17 +18,21 @@ import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorType;
 import net.minecraft.world.gen.chunk.DebugChunkGenerator;
+import net.minecraft.world.gen.chunk.FlatChunkGenerator;
 import net.minecraft.world.gen.chunk.StructuresConfig;
 import net.minecraft.world.gen.chunk.SurfaceChunkGenerator;
 
 // A skyland dimension using vanilla terrain generation
 public class ExampleChunkGenerator extends ChunkGenerator {
     
-    public static final Codec<ExampleChunkGenerator> codec = MapCodec.of(Encoder.empty(), Decoder.unit(() -> {
-        return new ExampleChunkGenerator(0);
-    })).stable().codec();
+    public static final Codec<ExampleChunkGenerator> codec = MapCodec.of(
+        Encoder.empty(),
+        Decoder.unit(() -> {
+            return new ExampleChunkGenerator(0);
+        })
+    ).stable().codec();
     
-    private final SurfaceChunkGenerator proxy;
+    private final ChunkGenerator proxy;
     
     public ExampleChunkGenerator(
         long seed
@@ -51,6 +56,16 @@ public class ExampleChunkGenerator extends ChunkGenerator {
                 );
             }).getChunkGeneratorType()
         );
+        
+        System.out.println("Constructed Example Chunk Generator " + seed);
+        
+        try {
+            int i = DebugChunkGenerator.INSTANCE.hashCode();
+            System.out.println(i);
+        }
+        catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
     
     @Override

@@ -4,11 +4,12 @@
   "package": "net.fabricmc.example.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-  ],
-  "client": [
     "MixinChunkGenerator",
     "MixinMinecraftServer",
     "MixinSurfaceChunkGenerator"
+  ],
+  "client": [
+
   ],
   "injectors": {
     "defaultRequire": 1
