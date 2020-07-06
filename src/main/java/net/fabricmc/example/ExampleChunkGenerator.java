@@ -5,6 +5,7 @@ import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.fabricmc.fabric.api.dimension.v1.FabricChunkGenerator;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
@@ -23,7 +24,7 @@ import net.minecraft.world.gen.chunk.StructuresConfig;
 import net.minecraft.world.gen.chunk.SurfaceChunkGenerator;
 
 // A skyland dimension using vanilla terrain generation
-public class ExampleChunkGenerator extends ChunkGenerator {
+public class ExampleChunkGenerator extends FabricChunkGenerator {
     
     public static final Codec<ExampleChunkGenerator> codec = MapCodec.of(
         Encoder.empty(),
@@ -58,14 +59,7 @@ public class ExampleChunkGenerator extends ChunkGenerator {
         );
         
         System.out.println("Constructed Example Chunk Generator " + seed);
-        
-        try {
-            int i = DebugChunkGenerator.INSTANCE.hashCode();
-            System.out.println(i);
-        }
-        catch (Throwable t) {
-            t.printStackTrace();
-        }
+        new Throwable().printStackTrace();
     }
     
     @Override
@@ -74,7 +68,7 @@ public class ExampleChunkGenerator extends ChunkGenerator {
     }
     
     @Override
-    public ChunkGenerator withSeed(long seed) {
+    public ChunkGenerator fabricWithSeed(long seed) {
         return new ExampleChunkGenerator(seed);
     }
     
@@ -103,4 +97,8 @@ public class ExampleChunkGenerator extends ChunkGenerator {
         return proxy.getColumnSample(x, z);
     }
     
+    @Override
+    public int getSeaLevel() {
+        return 0;
+    }
 }
