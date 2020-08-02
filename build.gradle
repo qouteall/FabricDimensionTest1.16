@@ -1,314 +1,101 @@
-//plugins {
-//	id 'fabric-loom' version '0.4-SNAPSHOT'
-//	id 'maven-publish'
-//}
-//
-//sourceCompatibility = JavaVersion.VERSION_1_8
-//targetCompatibility = JavaVersion.VERSION_1_8
-//
-//archivesBaseName = project.archives_base_name
-//version = project.mod_version
-//group = project.maven_group
-//
-//minecraft {
-//	accessWidener = file("src/main/resources/dimtest.accesswidener")
-//}
-//
-//dependencies {
-//	//to change the versions see the gradle.properties file
-//	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-//	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-//	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-//
-//	// Fabric API. This is technically optional, but you probably want it anyway.
-////	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-//	modImplementation "net.fabricmc.fabric-api:fabric-api:0.13.2333+local-1.16"
-//
-//	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-//	// You may need to force-disable transitiveness on them.
-//}
-//
-//repositories {
-//	mavenLocal()
-//}
-//
-//processResources {
-//	inputs.property "version", project.version
-//
-//	from(sourceSets.main.resources.srcDirs) {
-//		include "fabric.mod.json"
-//		expand "version": project.version
-//	}
-//
-//	from(sourceSets.main.resources.srcDirs) {
-//		exclude "fabric.mod.json"
-//	}
-//}
-//
-//// ensure that the encoding is set to UTF-8, no matter what the system default is
-//// this fixes some edge cases with special characters not displaying correctly
-//// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-//tasks.withType(JavaCompile) {
-//	options.encoding = "UTF-8"
-//}
-//
-//// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-//// if it is present.
-//// If you remove this task, sources will not be generated.
-//task sourcesJar(type: Jar, dependsOn: classes) {
-//	classifier = "sources"
-//	from sourceSets.main.allSource
-//}
-//
-//jar {
-//	from "LICENSE"
-//}
-//
-//// configure the maven publication
-//publishing {
-//	publications {
-//		mavenJava(MavenPublication) {
-//			// add all the jars that should be included when publishing to maven
-//			artifact(remapJar) {
-//				builtBy remapJar
-//			}
-//			artifact(sourcesJar) {
-//				builtBy remapSourcesJar
-//			}
-//		}
-//	}
-//
-//	// select the repositories you want to publish to
-//	repositories {
-//		// uncomment to publish to the local maven
-//		// mavenLocal()
-//	}
-//}
-
 plugins {
-	id 'java'
-	id 'eclipse'
-	id 'idea'
+	id 'fabric-loom' version '0.4-SNAPSHOT'
 	id 'maven-publish'
-	id 'fabric-loom' version '0.4.28' apply false
-	id 'net.minecrell.licenser' version '0.4.1'
-	id "org.ajoberstar.grgit" version "3.1.1"
-	id 'com.matthewprenger.cursegradle' version "1.4.0"
 }
 
-def ENV = System.getenv()
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
-version = "${project.mod_version}" + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local") + "-" + getBranch()
-logger.lifecycle("Building Fabric: " + version)
-
-import org.apache.commons.codec.digest.DigestUtils
-
-def getSubprojectVersion(project, version) {
-	if (grgit == null) {
-		return version + "+nogit"
-	}
-	def latestCommits = grgit.log(paths: [project.name], maxCommits: 1)
-	if (latestCommits.isEmpty()) {
-		return version + "+uncommited"
-	} else {
-		return version + "+" + latestCommits.get(0).id.substring(0, 8) + DigestUtils.sha256Hex("${project.minecraft_version}").substring(0, 2)
-	}
-}
-
-def getBranch() {
-	if (System.getenv().GIT_BRANCH) {
-		def branch = System.getenv().GIT_BRANCH
-		return branch.substring(branch.lastIndexOf("/") + 1)
-	}
-	if (grgit == null) {
-		return "unknown"
-	}
-	def branch = grgit.branch.current().name
-	return branch.substring(branch.lastIndexOf("/") + 1)
-}
-
-
-
-allprojects {
-	apply plugin: 'checkstyle'
-	apply plugin: 'maven-publish'
-	apply plugin: 'fabric-loom'
-	apply plugin: 'net.minecrell.licenser'
-
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
-
-	group = "com.qouteall.test-test"
-
-	sourceSets {
-		testmod {
-			compileClasspath += main.compileClasspath
-			runtimeClasspath += main.runtimeClasspath
-		}
-	}
-
-
-
-	dependencies {
-		minecraft "com.mojang:minecraft:${project.minecraft_version}"
-		mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-		modCompile "net.fabricmc:fabric-loader:0.8.8+build.202"
-		modImplementation "net.fabricmc.fabric-api:fabric-api:0.13.2333+local-1.16"
-	}
-
-	configurations {
-		dev
-	}
-
-	repositories {
-		mavenLocal()
-	}
-
-	jar {
-		classifier = "dev"
-	}
-
-	afterEvaluate {
-		remapJar {
-			input = file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar")
-			archiveName = "${archivesBaseName}-${version}.jar"
-		}
-
-		artifacts {
-			dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
-		}
-
-		processResources {
-			inputs.property "version", project.version
-
-			from(sourceSets.main.resources.srcDirs) {
-				include "fabric.mod.json"
-				expand "version": project.version
-			}
-
-			from(sourceSets.main.resources.srcDirs) {
-				exclude "fabric.mod.json"
-			}
-		}
-
-		license {
-			header rootProject.file('HEADER')
-			include '**/*.java'
-		}
-	}
-
-	task sourcesJar(type: Jar, dependsOn: classes) {
-		classifier = 'sources'
-		from sourceSets.main.allSource
-	}
-
-	checkstyle {
-		configFile = rootProject.file("checkstyle.xml")
-		toolVersion = '8.31'
-	}
-}
+archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
 
 minecraft {
 	accessWidener = file("src/main/resources/dimtest.accesswidener")
 }
 
-subprojects {
+dependencies {
+	//to change the versions see the gradle.properties file
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	dependencies {
-		testmodCompile sourceSets.main.output
-	}
+	// Fabric API. This is technically optional, but you probably want it anyway.
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+//	modImplementation "net.fabricmc.fabric-api:fabric-api:0.13.2333+local-1.16"
 
-	task remapMavenJar(type: Copy, dependsOn: remapJar) {
-		afterEvaluate {
-			from("${project.buildDir}/libs/$archivesBaseName-${version}.jar")
-			into("${project.buildDir}/libs/")
-			rename { String fn -> "$archivesBaseName-${version}-maven.jar" }
-		}
-	}
+	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
+	// You may need to force-disable transitiveness on them.
 
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				afterEvaluate {
-					artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-						builtBy remapMavenJar
-					}
-					artifact(sourcesJar) {
-						builtBy remapSourcesJar
-					}
-				}
-			}
-		}
 
-		setupRepositories(repositories)
-	}
 
-	javadoc.enabled = false
+
+
+
 }
 
-task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
-	afterEvaluate {
-		input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
-		archiveName = "${archivesBaseName}-${version}-maven.jar"
-		addNestedDependencies = false
+repositories {
+	mavenLocal()
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	from(sourceSets.main.resources.srcDirs) {
+		include "fabric.mod.json"
+		expand "version": project.version
+	}
+
+	from(sourceSets.main.resources.srcDirs) {
+		exclude "fabric.mod.json"
 	}
 }
 
+// ensure that the encoding is set to UTF-8, no matter what the system default is
+// this fixes some edge cases with special characters not displaying correctly
+// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+}
+
+// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+// if it is present.
+// If you remove this task, sources will not be generated.
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = "sources"
+	from sourceSets.main.allSource
+}
+
+jar {
+	from "LICENSE"
+}
+
+// configure the maven publication
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-				builtBy remapMavenJar
+			// add all the jars that should be included when publishing to maven
+			artifact(remapJar) {
+				builtBy remapJar
 			}
 			artifact(sourcesJar) {
 				builtBy remapSourcesJar
 			}
-			pom.withXml {
-				def depsNode = asNode().appendNode("dependencies")
-				subprojects.each {
-					def depNode = depsNode.appendNode("dependency")
-					depNode.appendNode("groupId", it.group)
-					depNode.appendNode("artifactId", it.name)
-					depNode.appendNode("version", it.version)
-					depNode.appendNode("scope", "compile")
-				}
-			}
 		}
 	}
 
-	setupRepositories(repositories)
-}
-
-void setupRepositories(RepositoryHandler repositories) {
-	//repositories.mavenLocal() // uncomment for testing
-	if (project.hasProperty('mavenPass')) {
-		repositories.maven {
-			url "http://mavenupload.modmuss50.me/"
-			credentials {
-				username 'buildslave'
-				password project.getProperty('mavenPass')
-			}
-		}
+	// select the repositories you want to publish to
+	repositories {
+		// uncomment to publish to the local maven
+		// mavenLocal()
 	}
-}
-
-task licenseFormatAll
-subprojects { p -> licenseFormatAll.dependsOn("${p.path}:licenseFormat") }
-subprojects.each { remapJar.dependsOn("${it.path}:remapJar") }
-
-sourceSets {
-	testmod
 }
 
 dependencies {
 	afterEvaluate {
 		subprojects.each {
-			compile project(path: ":${it.name}", configuration: "dev")
+			compile project(path: ":${it.name}")
 			include project("${it.name}:")
-
-			testmodCompile project("${it.name}:").sourceSets.testmod.output
 		}
 	}
 }
-
-apply from: 'https://github.com/FabricMC/fabric-docs/raw/master/gradle/ideconfig.gradle'

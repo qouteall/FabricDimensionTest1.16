@@ -15,12 +15,6 @@ public class ExampleMod implements ModInitializer {
 
 		System.out.println("Hello Fabric world!");
 		
-		Registry.register(
-			Registry.CHUNK_GENERATOR,
-			new Identifier("dimtest:example_generator"),
-			ExampleChunkGenerator.codec
-		);
-		
 		TestInterface.oops();
 	}
 }

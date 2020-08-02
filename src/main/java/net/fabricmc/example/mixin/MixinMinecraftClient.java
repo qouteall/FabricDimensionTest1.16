@@ -10,14 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MinecraftClient.class)
 public class MixinMinecraftClient {
-    @Shadow
-    private static MinecraftClient instance;
-    
-    @Overwrite
-    public static MinecraftClient getInstance() {
-        System.out.println("wow");
-        return instance;
-    }
     
    
 }
