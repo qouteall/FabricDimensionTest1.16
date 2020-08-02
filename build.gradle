@@ -6,7 +6,7 @@ plugins {
 }
 
 group = rootProject.maven_group
-archivesBaseName = rootProject.name.toLowerCase(Locale.ROOT)
+archivesBaseName = archives_base_name
 version = mod_version
 
 subprojects {
@@ -22,7 +22,7 @@ allprojects {
 	version = rootProject.mod_version
 
 	// Adds a few utility methods like getProjectProperty
-	apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/utilities.gradle'
+	//apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/utilities.gradle'
 
 	sourceSets {
 		api
@@ -30,9 +30,14 @@ allprojects {
 
 	repositories {
 		mavenCentral()
+		mavenLocal()
 		maven {
 			url 'http://maven.fabricmc.net/'
 			name 'Fabric'
+		}
+		maven {
+			name = 'JitPack'
+			url = 'https://jitpack.io'
 		}
 	}
 
@@ -43,55 +48,8 @@ allprojects {
 		options.encoding = 'UTF-8'
 	}
 
-	jar {
-		from(sourceSets.main.output) {
-			include 'fabric.mod.json'
-			expand 'version': project.version
-		}
-		from(sourceSets.main.output) {
-			exclude 'fabric.mod.json'
-		}
-	}
-
-	task sourcesJar(type: Jar, dependsOn: classes) {
-		archiveClassifier = 'sources'
-		from sourceSets.main.allSource
-	}
-
-	task apiJar(type: Jar, dependsOn: apiClasses) {
-		archiveClassifier = 'api-dev'
-		from sourceSets.api.allJava
-		from(sourceSets.api.output) {
-			include 'fabric.mod.json'
-			expand 'version': project.version
-		}
-		from(sourceSets.api.output) {
-			exclude 'fabric.mod.json'
-		}
-	}
-
-	task remapApiJar(type: RemapJarTask, dependsOn: project.apiJar) {
-		input = apiJar.archiveFile
-		archiveClassifier = 'api'
-		addNestedDependencies = false
-	}
-
-	task apiProdJar(type: Jar, dependsOn: project.remapApiJar) {
-		archiveClassifier = 'api-prod'
-		from(zipTree(remapApiJar.archiveFile)) {
-			exclude '**/*.java'
-			exclude '**/package-info.class'
-		}
-	}
-
-	remapJar.dependsOn(apiProdJar)
-
-	javadoc {
-		source += sourceSets.api.allJava
-	}
-
-	apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/changelog.gradle'
-	apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/maven_base.gradle'
+	//apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/changelog.gradle'
+	//apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/maven_base.gradle'
 
 	dependencies {
 		//to change the versions see the gradle.properties file
@@ -102,23 +60,73 @@ allprojects {
 		// Fabric API. This is technically optional, but you probably want it anyway.
 		modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-		// Lazily evaluated callable returning a non-live (unlike a FileCollection) list of files
-		sourceSets.api.compileClasspath += files({ sourceSets.main.compileClasspath.toList() })
-
-		compile sourceSets.api.output
-		include files(apiProdJar.archiveFile)
-
 		compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 	}
 
+	afterEvaluate {
+		remapJar {
+			input = file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar")
+			archiveName = "${archivesBaseName}-${version}.jar"
+		}
+
+		artifacts {
+			//dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
+		}
+
+		processResources {
+			inputs.property "version", project.version
+
+			from(sourceSets.main.resources.srcDirs) {
+				include "fabric.mod.json"
+				expand "version": project.version
+			}
+
+			from(sourceSets.main.resources.srcDirs) {
+				exclude "fabric.mod.json"
+			}
+		}
+	}
+
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
+}
+
+subprojects {
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
-				artifact(remapApiJar) {
-					classifier = 'api'
+				afterEvaluate {
+					artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
+						builtBy remapJar
+					}
+					artifact(sourcesJar) {
+						builtBy remapSourcesJar
+					}
 				}
-				artifact(apiProdJar) {
-					classifier = 'api-prod'
+			}
+		}
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
+				builtBy remapJar
+			}
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
+			}
+			pom.withXml {
+				def depsNode = asNode().appendNode("dependencies")
+				subprojects.each {
+					def depNode = depsNode.appendNode("dependency")
+					depNode.appendNode("groupId", it.group)
+					depNode.appendNode("artifactId", it.name)
+					depNode.appendNode("version", it.version)
+					depNode.appendNode("scope", "compile")
 				}
 			}
 		}
@@ -126,10 +134,7 @@ allprojects {
 }
 
 repositories {
-	maven {
-		name = 'JitPack'
-		url = 'https://jitpack.io'
-	}
+
 }
 
 dependencies {
