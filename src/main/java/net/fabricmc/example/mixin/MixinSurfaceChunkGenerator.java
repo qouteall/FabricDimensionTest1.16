@@ -11,24 +11,24 @@ import org.spongepowered.asm.mixin.Shadow;
 
 // This is only used in this test mod
 @Mixin(SurfaceChunkGenerator.class)
-public abstract class MixinSurfaceChunkGenerator extends ChunkGenerator {
+public abstract class MixinSurfaceChunkGenerator  {
     
-    @Shadow
-    @Final
-    protected ChunkGeneratorType field_24774;
-
-    public MixinSurfaceChunkGenerator(
-        BiomeSource biomeSource,
-        BiomeSource biomeSource2,
-        StructuresConfig structuresConfig,
-        long l
-    ) {
-        super(biomeSource, biomeSource2, structuresConfig, l);
-    }
-
-    // Make this method to exist in dedicated server
-    public ChunkGenerator withSeed(long seed) {
-        return new SurfaceChunkGenerator(this.biomeSource.withSeed(seed), seed, this.field_24774);
-    }
+//    @Shadow
+//    @Final
+//    protected ChunkGeneratorType field_24774;
+//
+//    public MixinSurfaceChunkGenerator(
+//        BiomeSource biomeSource,
+//        BiomeSource biomeSource2,
+//        StructuresConfig structuresConfig,
+//        long l
+//    ) {
+//        super(biomeSource, biomeSource2, structuresConfig, l);
+//    }
+//
+//    // Make this method to exist in dedicated server
+//    public ChunkGenerator withSeed(long seed) {
+//        return new SurfaceChunkGenerator(this.biomeSource.withSeed(seed), seed, this.field_24774);
+//    }
     
 }

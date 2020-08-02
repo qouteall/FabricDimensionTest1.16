@@ -59,7 +59,7 @@ public class ExampleChunkGenerator extends FabricChunkGenerator {
         );
         
         System.out.println("Constructed Example Chunk Generator " + seed);
-        new Throwable().printStackTrace();
+//        new Throwable().printStackTrace();
     }
     
     @Override

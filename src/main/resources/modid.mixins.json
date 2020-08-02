@@ -5,11 +5,12 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinChunkGenerator",
+    "MixinMinecraftClient",
+    "MixinMinecraftClient1",
     "MixinMinecraftServer",
     "MixinSurfaceChunkGenerator"
   ],
   "client": [
-
   ],
   "injectors": {
     "defaultRequire": 1
