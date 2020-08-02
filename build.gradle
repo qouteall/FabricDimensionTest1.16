@@ -1,8 +1,8 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
-	id 'maven-publish'
+    id 'fabric-loom' version '0.4-SNAPSHOT'
+    id 'maven-publish'
 }
 
 group = rootProject.maven_group
@@ -10,127 +10,120 @@ archivesBaseName = archives_base_name
 version = mod_version
 
 subprojects {
-	apply plugin: 'fabric-loom'
-	apply plugin: 'maven-publish'
+    apply plugin: 'fabric-loom'
+    apply plugin: 'maven-publish'
 }
 
 allprojects {
 
-	sourceCompatibility = JavaVersion.VERSION_1_8
-	targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
-	version = rootProject.mod_version
+    version = rootProject.mod_version
 
-	// Adds a few utility methods like getProjectProperty
-	//apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/utilities.gradle'
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url 'http://maven.fabricmc.net/'
+            name 'Fabric'
+        }
+        maven {
+            name = 'JitPack'
+            url = 'https://jitpack.io'
+        }
+    }
 
-	sourceSets {
-		api
-	}
+    // ensure that the encoding is set to UTF-8, no matter what the system default is
+    // this fixes some edge cases with special characters not displaying correctly
+    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
 
-	repositories {
-		mavenCentral()
-		mavenLocal()
-		maven {
-			url 'http://maven.fabricmc.net/'
-			name 'Fabric'
-		}
-		maven {
-			name = 'JitPack'
-			url = 'https://jitpack.io'
-		}
-	}
+    //apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/changelog.gradle'
+    //apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/maven_base.gradle'
 
-	// ensure that the encoding is set to UTF-8, no matter what the system default is
-	// this fixes some edge cases with special characters not displaying correctly
-	// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-	tasks.withType(JavaCompile) {
-		options.encoding = 'UTF-8'
-	}
+    dependencies {
+        //to change the versions see the gradle.properties file
+        minecraft "com.mojang:minecraft:${project.minecraft_version}"
+        mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	//apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/changelog.gradle'
-	//apply from: 'https://raw.githubusercontent.com/NerdHubMC/Gradle-Scripts/master/scripts/fabric/publish/maven_base.gradle'
+        // Fabric API. This is technically optional, but you probably want it anyway.
+        modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	dependencies {
-		//to change the versions see the gradle.properties file
-		minecraft "com.mojang:minecraft:${project.minecraft_version}"
-		mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-		modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+    }
 
-		// Fabric API. This is technically optional, but you probably want it anyway.
-		modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    afterEvaluate {
+        remapJar {
+            input = file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar")
+            archiveName = "${archivesBaseName}-${version}.jar"
+        }
 
-		compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-	}
+        artifacts {
+            //dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
+        }
 
-	afterEvaluate {
-		remapJar {
-			input = file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar")
-			archiveName = "${archivesBaseName}-${version}.jar"
-		}
+        processResources {
+            inputs.property "version", project.version
 
-		artifacts {
-			//dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
-		}
+            from(sourceSets.main.resources.srcDirs) {
+                include "fabric.mod.json"
+                expand "version": project.version
+            }
 
-		processResources {
-			inputs.property "version", project.version
+            from(sourceSets.main.resources.srcDirs) {
+                exclude "fabric.mod.json"
+            }
+        }
+    }
 
-			from(sourceSets.main.resources.srcDirs) {
-				include "fabric.mod.json"
-				expand "version": project.version
-			}
-
-			from(sourceSets.main.resources.srcDirs) {
-				exclude "fabric.mod.json"
-			}
-		}
-	}
-
-	task sourcesJar(type: Jar, dependsOn: classes) {
-		classifier = 'sources'
-		from sourceSets.main.allSource
-	}
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
 }
 
 subprojects {
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				afterEvaluate {
-					artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
-						builtBy remapJar
-					}
-					artifact(sourcesJar) {
-						builtBy remapSourcesJar
-					}
-				}
-			}
-		}
-	}
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                afterEvaluate {
+                    artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
+                        builtBy remapJar
+                    }
+                    artifact(sourcesJar) {
+                        builtBy remapSourcesJar
+                    }
+                }
+            }
+        }
+    }
 }
 
 publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-			pom.withXml {
-				def depsNode = asNode().appendNode("dependencies")
-				subprojects.each {
-					def depNode = depsNode.appendNode("dependency")
-					depNode.appendNode("groupId", it.group)
-					depNode.appendNode("artifactId", it.name)
-					depNode.appendNode("version", it.version)
-					depNode.appendNode("scope", "compile")
-				}
-			}
-		}
-	}
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+            pom.withXml {
+                def depsNode = asNode().appendNode("dependencies")
+                subprojects.each {
+                    def depNode = depsNode.appendNode("dependency")
+                    depNode.appendNode("groupId", it.group)
+                    depNode.appendNode("artifactId", it.name)
+                    depNode.appendNode("version", it.version)
+                    depNode.appendNode("scope", "compile")
+                }
+            }
+        }
+    }
 }
 
 repositories {
@@ -138,10 +131,10 @@ repositories {
 }
 
 dependencies {
-	afterEvaluate {
-		subprojects.each {
-			compile project(path: ":${it.name}")
-			include project("${it.name}:")
-		}
-	}
+    afterEvaluate {
+        subprojects.each {
+            compile project(path: ":${it.name}")
+            include project("${it.name}:")
+        }
+    }
 }
