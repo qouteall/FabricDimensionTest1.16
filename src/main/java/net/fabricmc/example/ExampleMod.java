@@ -1,8 +1,10 @@
 package net.fabricmc.example;
 
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import oops.TestInterface;
 
 public class ExampleMod implements ModInitializer {
 	@Override
@@ -18,5 +20,7 @@ public class ExampleMod implements ModInitializer {
 			new Identifier("dimtest:example_generator"),
 			ExampleChunkGenerator.codec
 		);
+		
+		TestInterface.oops();
 	}
 }

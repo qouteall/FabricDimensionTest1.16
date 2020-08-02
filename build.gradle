@@ -127,6 +127,8 @@ def getBranch() {
 	return branch.substring(branch.lastIndexOf("/") + 1)
 }
 
+
+
 allprojects {
 	apply plugin: 'checkstyle'
 	apply plugin: 'maven-publish'
@@ -145,10 +147,13 @@ allprojects {
 		}
 	}
 
+
+
 	dependencies {
 		minecraft "com.mojang:minecraft:${project.minecraft_version}"
 		mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 		modCompile "net.fabricmc:fabric-loader:0.8.8+build.202"
+		modImplementation "net.fabricmc.fabric-api:fabric-api:0.13.2333+local-1.16"
 	}
 
 	configurations {
@@ -201,6 +206,10 @@ allprojects {
 		configFile = rootProject.file("checkstyle.xml")
 		toolVersion = '8.31'
 	}
+}
+
+minecraft {
+	accessWidener = file("src/main/resources/dimtest.accesswidener")
 }
 
 subprojects {
