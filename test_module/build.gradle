@@ -1,0 +1,6 @@
+archivesBaseName = "test_module"
+version = getSubprojectVersion(project, "1.0.0")
+
+dependencies {
+    compile project(path: ':test_module', configuration: 'dev')
+}
