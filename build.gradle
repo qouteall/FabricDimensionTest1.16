@@ -103,6 +103,8 @@ subprojects {
     }
 }
 
+subprojects.each { remapJar.dependsOn("${it.path}:remapJar") }
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
